@@ -1,0 +1,18 @@
+#!/bin/bash
+
+set -e
+set -u
+
+base_dir="$(git rev-parse --show-toplevel)"
+
+for h in applypatch-msg pre-applypatch post-applypatch pre-commit prepare-commit-msg commit-msg post-commit pre-rebase post-checkout post-merge pre-push pre-receive update post-receive post-update push-to-checkout pre-auto-gc post-rewrite
+do
+  hook_file="$base_dir/$h"
+
+  if [ ! -f "$hook_file" ]; then
+    continue
+  fi
+
+  ln -s "$hook_file" "$base_dir/.git/hooks/$h"
+
+done

@@ -1,0 +1,41 @@
+#!/bin/bash
+
+set -u
+set -e
+
+master() {
+  old_patch=$patch
+  patch=$(($patch + 1))
+  echo "$major.$minor.$patch" > $versions_file
+  git add $versions_file
+  git commit -m "updating versions.txt from $major.$minor.$old_patch to $major.$minor.$patch after merge"
+}
+
+develop() {
+  old_minor=$minor
+  minor=$(($minor + 1))
+  echo "$major.$minor.$patch" > $versions_file
+  git add $versions_file
+  git commit -m "updating versions.txt from $major.$old_minor.$patch to $major.$minor.$patch after merge"
+}
+
+versions_file=$(git rev-parse --show-toplevel)/version.txt
+versions=$(cat $versions_file)
+branch_name=$(git rev-parse --abbrev-ref HEAD)
+
+major=$(echo $versions | awk -F'.' '{print $1}')
+minor=$(echo $versions | awk -F'.' '{print $2}')
+patch=$(echo $versions | awk -F'.' '{print $3}')
+
+case $branch_name in
+  develop)  develop
+  ;;
+
+  master)  master
+  ;;
+
+  *) exit 0
+  ;;
+esac
+
+
