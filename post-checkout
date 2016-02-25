@@ -16,3 +16,26 @@ do
   ln -s "$hook_file" "$base_dir/.git/hooks/$h"
 
 done
+
+
+
+typeset author_set=false
+
+while read d; do
+  if ! git remote -v | grep -q "$d" 2>&1 > /dev/null
+  then
+    continue
+  fi
+
+  git config --local user.name "$(id -un)"
+  git config --local user.email $(id -un)@$(cat ~/.domain)
+  author_set=true
+done < ~/.gitdomains
+
+
+if ! $author_set
+then
+  git config --local user.name "$(cat ~/.github_user | grep username | awk -F'=' '{print $2}')"
+  git config --local user.email "$(cat ~/.github_user | grep email | awk -F'=' '{print $2}')"
+  author_set=true
+fi
